@@ -1,0 +1,118 @@
+#!/bin/bash
+
+show_option(){
+	clear
+	echo " M E N U "
+	echo ""
+	echo "1. Új mappa létrehozása"
+	echo "2. Jegyzet létrehozása"
+	echo "3. Jegyzet összefűzése"
+	echo "4. Jegyzet törlése"
+	echo "5. Pontos idő"
+	echo "6. Email küldése"
+	echo "7. Kilépés"
+	}
+
+pause(){
+	read -p "Nyomjon ENTER-t a folytatáshoz" fackEnterKey
+	}
+
+new_dir(){
+	echo "Add meg a mappa nevét:"
+	read dir
+	if [ -d "$dir" ];
+	then
+		echo "Mappa már létezik"
+	else
+		`mkdir $dir`
+		echo "Mappa kész"
+	fi
+	pause
+	}
+
+new_note(){
+	echo "Adja meg a file nevét:"
+	read fname
+	echo "Adja meg, hova legyen mentve("ide" esetén jelenlegi pozíció):"
+	read dir
+	echo "Adja meg a jegyzet tartalmát:"
+	read text
+	
+	if [ "$dir" == "ide" ];
+	then
+		echo $text >> $fname.txt
+	else
+		echo $text >> ../$dir/$fname.txt
+	fi
+	pause
+	}
+
+merge_notes(){
+	echo "Adja meg az egyik jegyzet nevét:"
+	read note1
+	echo "Adja meg a másik jegyzet nevét:"
+	read note2
+	if [ -f "$note1" && -f "$note2"];
+	then
+		echo $note1 "\n" $note2 >> merge.txt
+	else
+		echo "Hiba, nem találni valamelyik jegyzetet"
+	fi
+	pause
+	}
+
+delete_note(){
+	echo "Adja meg a jegyzet nevét"
+	read note
+	if [ -f "$note"];
+	then
+		rm -i $note
+	else
+		echo "Nincs ilyen jegyzet"
+	fi
+	pause
+	}
+	
+show_date(){
+	Year=`date +%Y`
+	Month=`date +%m`
+	Day=`date +%d`
+	Hour=`date +%H`
+	Minute=`date +%M`
+	Second=`date +%S`
+	echo `date`
+	echo "Mai dátum: $Year. $Month. $Day"
+	echo "Pontos idő: $Hour:$Minute:$Second"
+	pause
+	}
+send_mail(){
+	echo "Adja meg a címzettet:"
+	read recipient
+	echo "Adja meg a tárgyat:"
+	read subject
+	echo "Adja meg az üzenetet:"
+	read message
+	`mail -s $subject $recipient <<< $message`
+	pause
+	}
+
+read_menu(){
+	local option
+	echo ""
+	read -p "Válasszon:" choice
+	case $choice in
+		1) new_dir ;;
+		2) new_note ;;
+		3) merge_notes ;;
+		4) delete_note ;;
+		5) show_date ;;
+		6) send_mail ;;
+		7) exit 0 ;;
+	esac
+	}	
+	
+	while true
+	do
+		show_option
+		read_menu
+	done
